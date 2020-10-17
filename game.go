@@ -7,7 +7,7 @@ type game struct {
 	rows      int
 	columns   int
 	playerOne int
-	platerTwo int
+	playerTwo int
 }
 
 func newGame() *game {
@@ -15,7 +15,7 @@ func newGame() *game {
 	g.rows = 6
 	g.columns = 7
 	g.playerOne = 1
-	g.platerTwo = 2
+	g.playerTwo = 2
 	return g
 }
 
@@ -26,21 +26,79 @@ func (g *game) completeTurn(player int, column int) {
 
 }
 
-func (g *game) checkWin(player int) {
-	// Check for columns
-	// check for rows
-	// Check right-diagonal
-	// Check left-diagonal
-}
-
-func (g *game) checkWinRows(player int) {
-	for i := 0; i < g.rows; i++ {
-		g.checkSubSecuence(i, 0, 0, 1)
+func (g *game) checkWin(player int) bool {
+	if g.checkWinRows(player) {
+		return true
 	}
+	if g.checkWinColumns(player) {
+		return true
+	}
+	if g.checkWinRightDiagonal(player) {
+		return true
+	}
+	if g.checkWinLeftDiagonal(player) {
+		return true
+	}
+	return false
 }
 
-func (g *game) checkSubSecuence(row int, column int, rowMove int, columnMove int) bool {
+func (g *game) checkWinRows(player int) bool {
+	for i := 0; i < g.rows; i++ {
+		if g.checkSubSecuence(player, i, 0, 0, 1) {
+			return true
+		}
+	}
+	return false
+}
 
+func (g *game) checkWinColumns(player int) bool {
+	for i := 0; i < g.columns; i++ {
+		if g.checkSubSecuence(player, 0, i, 1, 0) {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *game) checkWinRightDiagonal(player int) bool {
+	for row := 0; row < g.rows; row++ {
+		for column := 0; column < g.columns; column++ {
+			if g.checkSubSecuence(player, row, column, 1, 1) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (g *game) checkWinLeftDiagonal(player int) bool {
+	for row := 0; row < g.rows; row++ {
+		for column := g.columns - 1; column >= 0; column-- {
+			if g.checkSubSecuence(player, row, column, 1, -1) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (g *game) checkSubSecuence(player int, row int, column int, rowMove int, columnMove int) bool {
+	lastCell := 0
+	contiguousCells := 0
+	for row < g.rows && column < g.columns && row >= 0 && column >= 0 {
+		lastCell = g.board[row][column]
+		if lastCell == player {
+			contiguousCells++
+		} else {
+			contiguousCells = 0
+		}
+		if contiguousCells == 4 {
+			return true
+		}
+		row += rowMove
+		column += columnMove
+	}
+	return false
 }
 
 func (g *game) makeMove(player int, column int) {
