@@ -1,29 +1,76 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type game struct {
 	board     [6][7]int
 	rows      int
 	columns   int
-	playerOne int
-	playerTwo int
+	playerOne *humanPlayer
+	playerTwo *humanPlayer
 }
 
 func newGame() *game {
 	g := new(game)
 	g.rows = 6
 	g.columns = 7
-	g.playerOne = 1
-	g.playerTwo = 2
+	g.playerOne = newHumanPlayer(1)
+	g.playerTwo = newHumanPlayer(2)
 	return g
 }
 
-func (g *game) completeTurn(player int, column int) {
-	// Player makes a move
-	g.makeMove(player, column)
-	// Check if game ended
+func (g *game) play() int {
+	rand.Seed(time.Now().UnixNano())
+	player := g.choosePlayer(rand.Intn(2) + 1)
+	winner := 0
+	for true {
+		// PLAYER CHOOSE MOVE
+		choosenMove := player.chooseMove()
+		// chooseMove := 1
+		g.makeMove(player.color, choosenMove)
+		g.printBoard()
+		if g.checkWin(player.color) {
+			winner = player.color
+			break
+		}
+		if g.isBoardFull() {
+			break
+		}
+		player = g.choosePlayer(player.color)
+	}
+	return winner
+}
 
+func (g *game) choosePlayer(playerNumber int) humanPlayer {
+	if playerNumber == g.playerOne.color {
+		return *g.playerTwo
+	}
+	return *g.playerOne
+
+}
+
+func (g *game) isCellEmpty(row int, column int) bool {
+	if g.board[row][column] != 0 {
+		return false
+	}
+	return true
+}
+
+func (g *game) isColumnFull(column int) bool {
+	return !g.isCellEmpty(0, column)
+}
+
+func (g *game) isBoardFull() bool {
+	for i := 0; i < g.columns; i++ {
+		if !g.isColumnFull(i) {
+			return false
+		}
+	}
+	return true
 }
 
 func (g *game) checkWin(player int) bool {
@@ -106,17 +153,6 @@ func (g *game) makeMove(player int, column int) {
 	if !g.isColumnFull(column) {
 		g.insertToken(player, column)
 	}
-}
-
-func (g *game) isCellEmpty(row int, column int) bool {
-	if g.board[row][column] != 0 {
-		return false
-	}
-	return true
-}
-
-func (g *game) isColumnFull(column int) bool {
-	return !g.isCellEmpty(0, column)
 }
 
 func (g *game) insertToken(player int, column int) {
