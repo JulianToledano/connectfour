@@ -10,16 +10,16 @@ type game struct {
 	board     [6][7]int
 	rows      int
 	columns   int
-	playerOne *humanPlayer
-	playerTwo *humanPlayer
+	playerOne player
+	playerTwo player
 }
 
-func newGame() *game {
+func newGame(playerOne, playerTwo player) *game {
 	g := new(game)
 	g.rows = 6
 	g.columns = 7
-	g.playerOne = newHumanPlayer(1)
-	g.playerTwo = newHumanPlayer(2)
+	g.playerOne = playerOne
+	g.playerTwo = playerTwo
 	return g
 }
 
@@ -28,28 +28,29 @@ func (g *game) play() int {
 	player := g.choosePlayer(rand.Intn(2) + 1)
 	winner := 0
 	for true {
-		// PLAYER CHOOSE MOVE
-		choosenMove := player.chooseMove()
-		// chooseMove := 1
-		g.makeMove(player.color, choosenMove)
+		moveMade := false
+		for !moveMade {
+			choosenMove := player.chooseMove()
+			moveMade = g.makeMove(player.getColor(), choosenMove)
+		}
 		g.printBoard()
-		if g.checkWin(player.color) {
-			winner = player.color
+		if g.checkWin(player.getColor()) {
+			winner = player.getColor()
 			break
 		}
 		if g.isBoardFull() {
 			break
 		}
-		player = g.choosePlayer(player.color)
+		player = g.choosePlayer(player.getColor())
 	}
 	return winner
 }
 
-func (g *game) choosePlayer(playerNumber int) humanPlayer {
-	if playerNumber == g.playerOne.color {
-		return *g.playerTwo
+func (g *game) choosePlayer(playerNumber int) player {
+	if playerNumber == g.playerOne.getColor() {
+		return g.playerTwo
 	}
-	return *g.playerOne
+	return g.playerOne
 
 }
 
@@ -148,11 +149,13 @@ func (g *game) checkSubSecuence(player int, row int, column int, rowMove int, co
 	return false
 }
 
-func (g *game) makeMove(player int, column int) {
+func (g *game) makeMove(player int, column int) bool {
 	column--
 	if !g.isColumnFull(column) {
 		g.insertToken(player, column)
+		return true
 	}
+	return false
 }
 
 func (g *game) insertToken(player int, column int) {
@@ -172,4 +175,5 @@ func (g *game) printBoard() {
 		}
 		fmt.Println()
 	}
+	fmt.Println("----------------------------")
 }

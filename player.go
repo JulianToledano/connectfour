@@ -1,9 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type player interface {
+	chooseMove() int
+	getColor() int
+}
 
 type humanPlayer struct {
 	color int
+}
+
+type iaPlayer struct {
+	color     int
+	difficult int
 }
 
 func newHumanPlayer(color int) *humanPlayer {
@@ -12,13 +26,45 @@ func newHumanPlayer(color int) *humanPlayer {
 	return hp
 }
 
-func (p *humanPlayer) chooseMove() int {
-	var move int
+func (p humanPlayer) chooseMove() int {
+	move := -1
 	fmt.Println("Choose a column")
-	_, err := fmt.Scan(&move)
-	if err != nil {
-		fmt.Println("Somethig went wrong!!")
-
+	for move < 0 || move > 7 {
+		_, err := fmt.Scan(&move)
+		if err != nil {
+			fmt.Println("Not valid input...")
+		}
 	}
 	return move
+}
+
+func (p humanPlayer) getColor() int {
+	return p.color
+}
+
+func newIaPlayer(color, difficult int) *iaPlayer {
+	ia := new(iaPlayer)
+	ia.color = color
+	ia.difficult = difficult
+	return ia
+}
+
+func (ia iaPlayer) chooseMove() int {
+	if ia.difficult == 1 {
+		return ia.easyMode()
+	}
+	return 3
+}
+
+func (ia iaPlayer) getColor() int {
+	return ia.color
+}
+
+func (ia iaPlayer) easyMode() int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(7) + 1
+}
+
+func (ia iaPlayer) minimax() int {
+	return -1
 }
