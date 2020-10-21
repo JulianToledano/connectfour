@@ -50,10 +50,8 @@ func newIaPlayer(color, difficult int) *iaPlayer {
 }
 
 func (ia iaPlayer) chooseMove() int {
-	if ia.difficult == 1 {
-		return ia.easyMode()
-	}
-	return 3
+	return ia.easyMode()
+
 }
 
 func (ia iaPlayer) getColor() int {
@@ -63,8 +61,4 @@ func (ia iaPlayer) getColor() int {
 func (ia iaPlayer) easyMode() int {
 	rand.Seed(time.Now().UnixNano())
 	return rand.Intn(7) + 1
-}
-
-func (ia iaPlayer) minimax() int {
-	return -1
 }
